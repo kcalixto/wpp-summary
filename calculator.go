@@ -10,7 +10,7 @@ import (
 	"unicode/utf8"
 )
 
-func CalculateTokens(file *os.File) {
+func CalculateTokens(file *os.File) error {
 	// Leitura do arquivo
 	scanner := bufio.NewScanner(file)
 	var fullText string
@@ -53,8 +53,7 @@ func CalculateTokens(file *os.File) {
 	// Estimar se está dentro dos limites do modelo
 	fmt.Println("\n=== Compatibilidade com Claude 3.5 Sonnet ===")
 
-	// Limites do Claude 3.5 Sonnet (conforme conhecimento até abril 2025)
-	const claudeSonnetLimit = 200000
+	const claudeSonnetLimit = 50000
 
 	if totalTokens <= claudeSonnetLimit {
 		fmt.Printf("✅ O arquivo está dentro do limite (~%d tokens). O Claude 3.5 Sonnet pode processar.\n", totalTokens)
@@ -67,7 +66,10 @@ func CalculateTokens(file *os.File) {
 		fmt.Println("   - Divida o arquivo em partes menores")
 		fmt.Println("   - Remova mensagens menos importantes")
 		fmt.Println("   - Pré-processe o arquivo para reduzir conteúdo irrelevante")
+		return fmt.Errorf("o arquivo excede o limite do Claude 3.5 Sonnet em ~%d tokens", totalTokens-claudeSonnetLimit)
 	}
+
+	return nil
 }
 
 func readPromptFile() string {

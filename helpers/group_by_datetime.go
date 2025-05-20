@@ -1,5 +1,10 @@
 package helpers
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 func GroupByDateTime(messages []*Line) []*Line {
 	var groupedMessages []*Line
 	groupedMap := make(map[string][]*Line)
@@ -29,9 +34,23 @@ func GroupByDateTime(messages []*Line) []*Line {
 	// TODO
 
 	for timeRange, messages := range groupedMap {
+
+		fmt.Printf("[%s] %d messages\n", timeRange, len(messages))
+		sampledmessages := make([]*Line, 4)
+		for i := range len(messages) {
+			if i < 4 {
+				sampledmessages[i] = messages[i]
+			} else {
+				break
+			}
+		}
+		b, _ := json.Marshal(sampledmessages)
+		fmt.Printf("sampledmessages: %s\n", string(b))
+
 		groupedMessages = append(groupedMessages, &Line{
 			Time: timeRange,
 		})
+
 		groupedMessages = append(groupedMessages, messages...)
 	}
 

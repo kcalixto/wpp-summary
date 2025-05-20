@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 	"regexp"
@@ -19,7 +20,7 @@ import (
 [ ] Consolidar mensagens sequenciais do mesmo remetente
 */
 
-func FixTokens(file *os.File) {
+func FixTokens(file *os.File, dest string) {
 	// Leitura do arquivo
 	scanner := bufio.NewScanner(file)
 	var fullText string
@@ -34,7 +35,7 @@ func FixTokens(file *os.File) {
 	fullText = StartFix(fullText)
 
 	// Escrever o texto reduzido em um novo arquivo
-	outputFile, err := os.Create("output.txt")
+	outputFile, err := os.Create(dest)
 	if err != nil {
 		fmt.Printf("Erro ao criar arquivo de saída: %v\n", err)
 		os.Exit(1)
@@ -61,7 +62,7 @@ func StartFix(str string) string {
 		}
 
 		previousLine := &helpers.Line{}
-		if i > 0 {
+		if i > 0 && len(preFixedLines) > 0 {
 			previousLine = preFixedLines[len(preFixedLines)-1]
 		}
 
@@ -115,7 +116,24 @@ func StartFix(str string) string {
 
 	// * Recria a linha com os dados fixados
 	fullText := ""
+	// sort postFixedLines
+	// TODO: study sorting types
+	// postFixedLines = func(lines []*helpers.Line) []*helpers.Line {
+	// 	// Sort lines by time
+	// 	for i := range len(lines) {
+	// 		for j := range len(lines) - i - 1 {
+	// 			if lines[j].Time > lines[j+1].Time {
+	// 				lines[j], lines[j+1] = lines[j+1], lines[j]
+	// 			}
+	// 		}
+	// 	}
+	// 	return lines
+	// }(postFixedLines)
+
 	for _, line := range postFixedLines {
+		b, _ := json.Marshal(line)
+		fmt.Printf("line: %s\n", string(b))
+
 		if line.Name == "" {
 			if line.Time == "" { // message
 				fullText += line.Message + "\n"

@@ -1,3 +1,4 @@
 *.txt
 .goosehints
 *.cov
+tmp/
